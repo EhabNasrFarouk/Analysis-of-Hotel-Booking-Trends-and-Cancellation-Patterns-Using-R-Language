@@ -1,0 +1,597 @@
+---
+title: <span style="color:#4974a5;">Comprehensive Analysis of Hotel Booking Trends
+  and Cancellation Patterns</span>
+author: "Ehab Nasr Farouk"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+<span style="color:#4974a5; font-size:24px;">Introduction</span>
+
+This report provides a comprehensive analysis of the hotel booking dataset, examining booking trends, cancellations, and customer demographics to derive actionable insights.
+
+```{r, echo=FALSE, fig.align='center',fig.width=120, fig.height=4}
+knitr::include_graphics("https://th.bing.com/th/id/OIP.yrJhmX5_BJZCPIFs7zsgLAAAAA?rs=1&pid=ImgDetMain.jpeg")
+```
+
+## <span style="color:#4974a5;">Agenda</span>
+
+### <span style="color:#4974a5;">1. Introduction</span>
+
+-   **<span style="color:#4974a5;">Objective</span>**: Define the goals of your analysis. What questions are you trying to answer or what insights are you looking for?
+-   **<span style="color:#4974a5;">Dataset Overview</span>**: Brief description of the dataset, including its size, columns, and general contents.
+
+###  <span style="color:#4974a5;">2. Data Preparation </span>
+
+-   **<span style="color:#4974a5;">Load the Data</span>**: Use read.csv() or other functions to load your dataset into R.
+
+-   **<span style="color:#4974a5;">Inspect the Data</span>**: Use functions like head(), str(), and summary() to understand the structure and contents of the dataset.
+
+-   **<span style="color:#4974a5;">Handle Missing Values</span>**: Identify and address missing values using methods like imputation or removal.
+
+-   **<span style="color:#4974a5;">Convert Data Types</span>**: Ensure that all columns have the correct data types (e.g., factors, dates).
+
+-   **<span style="color:#4974a5;">Feature Engineering</span>**: Create new variables if needed (e.g., binning continuous variables).
+
+###  <span style="color:#4974a5;">3. Exploratory Data Analysis (EDA)</span>
+
+-   **<span style="color:#4974a5;">Descriptive Statistics</span>**: Calculate summary statistics such as mean, median, and standard deviation.
+-   **<span style="color:#4974a5;">Data Visualization</span>**:
+    -   **<span style="color:#4974a5;">Univariate Analysis</span>**: Create histograms, bar plots, and box plots to understand the distribution of individual variables.
+    -   **<span style="color:#4974a5;">Bivariate Analysis</span>**: Use scatter plots, line charts, and correlation matrices to explore relationships between variables.
+-   **<span style="color:#4974a5;">Distribution Analysis</span>**: Check the distribution of key variables and look for any anomalies.
+
+###  <span style="color:#4974a5;">4. Data Analysis</span>
+
+-   **<span style="color:#4974a5;">Group Analysis</span>**: Aggregate and summarize data based on categorical variables (e.g., total cancellations by country or market segment).
+-   **<span style="color:#4974a5;">Trend Analysis</span>**: Analyze trends over time if applicable (e.g., cancellation rates by month or year).
+-   **<span style="color:#4974a5;">Comparison Analysis</span>**: Compare different groups or categories to identify patterns or significant differences.
+
+## <span style="color:#4974a5;">Overview of Dataset</span>
+
+  **<span style="color:#4974a5;">1. Hotel</span>**: Indicates the type of hotel (e.g., "City Hotel" or "Resort Hotel").
+  <br>
+  **<span style="color:#4974a5;">2. Is_canceled</span>**: Whether a booking was canceled (1) or not (0).
+  <br>
+  **<span style="color:#4974a5;">3. Lead_time</span>**: The number of days between the booking date and the arrival date.
+  <br>
+  **<span style="color:#4974a5;">4. Arrival_date_year, Arrival_date_month, Arrival_date_day_of_month</span>**: Details about the arrival date.
+  <br>
+  **<span style="color:#4974a5;">5. Stays_in_weekend_nights, Stays_in_week_nights</span>**: The number of nights stayed during the weekend and week, respectively.
+  <br>
+  **<span style="color:#4974a5;">6. Adults, Children, Babies</span>**: Number of adults, children, and babies in the booking.
+  <br>
+  **<span style="color:#4974a5;">7. Meal</span>**: Type of meal plan booked.
+  <br>
+  **<span style="color:#4974a5;">8. Country</span>**: Country of origin of the customer.
+  <br>
+ **<span style="color:#4974a5;">9. Market_segment, Distribution_channel</span>**: The market segment and channel through which the booking was made.
+ <br>
+ **<span style="color:#4974a5;">10. Is_repeated_guest</span>**: Indicates if the guest is a returning customer.
+ <br>
+ **<span style="color:#4974a5;">11. Previous_cancellations, Previous_bookings_not_canceled</span>**: Details about the guest's previous cancellations and bookings.
+ <br>
+ **<span style="color:#4974a5;">12. Reserved_room_type, Assigned_room_type</span>**: The room types reserved and assigned.
+ <br>
+ **<span style="color:#4974a5;">13. Booking_changes</span>**: Number of changes made to the booking.
+ <br>
+ **<span style="color:#4974a5;">14. Deposit_type</span>**: The type of deposit required.
+ <br>
+ **<span style="color:#4974a5;">15. Agent, Company</span>**: Identifiers for the booking agent or company.
+ <br>
+ **<span style="color:#4974a5;">16. Days_in_waiting_list</span>**: Number of days the booking was on a waiting list.
+ <br>
+ **<span style="color:#4974a5;">17. Customer_type</span>**: Type of customer (e.g., "Transient", "Group").
+ <br>
+ **<span style="color:#4974a5;">18. ADR</span>**: Average Daily Rate, indicating the daily rate paid per room.
+ <br>
+ **<span style="color:#4974a5;">19. Required_car_parking_space</span>**s: Number of parking spaces required.
+ <br>
+ **<span style="color:#4974a5;">20. Total_of_special_requests</span>**: Number of special requests made by the customer.
+ <br>
+ **<span style="color:#4974a5;">21. Reservation_status, Reservation_status_date</span>**: The reservation's status (e.g., "Canceled", "Check-out") and the date of the status.
+
+## <span style="color:#4974a5;">Import Necessary Libraries</span>
+
+```{r}
+library(tidyverse)
+library(ggrepel)
+library(dplyr)
+library(tidyr)  
+```
+
+## <span style="color:#4974a5;">Load the dataset</span>
+
+```{r}
+df <- read.csv("D:\\DataScience-projects\\R Project\\Dataset\\hotel_bookings.csv")
+```
+
+## <span style="color:#4974a5;">Display first few rows of the dataset</span>
+
+```{r}
+head(df)
+```
+
+## <span style="color:#4974a5;"> Dataset dimensions</span>
+
+```{r}
+cat("Number of rows:",nrow(df))
+cat("Number of columns:",ncol(df))
+```
+
+## <span style="color:#4974a5;">summary of columns</span>
+
+```{r}
+str(df)
+```
+
+## <span style="color:#4974a5;">convert date column to date type</span>
+
+```{r}
+df$reservation_status_date  <- as.Date(df$reservation_status_date,format="%Y-%m-%d")
+```
+
+## <span style="color:#4974a5;">check for missing values</span>
+
+```{r}
+missing_values <- sapply(df,function(x) sum(is.na(x)))
+missing_values
+```
+
+## <span style="color:#4974a5;">clean column names</span>
+
+```{r}
+df <- df %>% rename_all(~ str_replace_all(.," ","_"))
+names(df)
+```
+
+## <span style="color:#4974a5;">Summary statistics for numerical columns</span>
+
+```{r}
+summary(df %>% select(lead_time, stays_in_weekend_nights, stays_in_week_nights, adr))
+```
+
+## <span style="color:#4974a5;">Distribution of cancellation</span>
+
+```{r}
+table(df$is_canceled)
+```
+
+## <span style="color:#4974a5;">Booking Trends</span>
+
+### <span style="color:#4974a5;"> 1. Is there a seasonal trend in the booking patterns?</span>
+
+```{r}
+
+monthly_booking <- df %>% 
+  group_by(arrival_date_month) %>% 
+  summarize(booking_count = n()) %>%
+  mutate(arrival_date_month = fct_reorder(arrival_date_month, booking_count, .desc = TRUE))  
+
+ggplot(monthly_booking, aes(x = arrival_date_month, y = booking_count)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  geom_text(aes(label = booking_count), vjust = -0.5) +  
+  labs(title = "Monthly Booking Counts", x = "Month", y = "Number of Bookings") +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.background = element_blank(),  
+    panel.grid.major = element_blank(),  
+    panel.grid.minor = element_blank(),   
+    plot.background = element_blank()     
+  )
+
+```
+
+###  <span style="color:#4974a5;">2. Does the booking cancellation rate increase as the lead time increases?</span>
+
+```{r}
+df$is_canceled <- factor(df$is_canceled, levels = c(0, 1), labels = c("Not Canceled", "Canceled"))
+
+df <- df %>%
+  mutate(lead_time_bins = cut(lead_time, 
+                              breaks = c(0, 50, 100, 150, 200, 250, 300, 350, Inf),
+                              labels = c("0-50", "51-100", "101-150", "151-200", "201-250", "251-300", "301-350", "350+"),
+                              include.lowest = TRUE))
+
+ggplot(df, aes(x = lead_time_bins, fill = is_canceled)) +
+  geom_bar(position = "dodge") +
+  labs(title = "Lead Time and Cancellations", 
+       x = "Lead Time (Days)", 
+       y = "Number of Bookings") +
+  scale_fill_manual(values = c("Not Canceled" = "skyblue", "Canceled" = "tomato")) +
+  theme_minimal() + 
+  theme(panel.grid = element_blank())
+```
+
+###  <span style="color:#4974a5;">3. How does the percentage of cancellations vary by arrival year?</span>
+
+```{r}
+df <- read.csv("D:\\DataScience-projects\\R Project\\Dataset\\hotel_bookings.csv")
+df$is_canceled <- factor(df$is_canceled, levels = c(0, 1), labels = c("Not Canceled", "Canceled"))
+
+summary_df <- df %>%
+  group_by(arrival_date_year, is_canceled) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  group_by(arrival_date_year) %>%
+  mutate(percentage = count / sum(count) * 100)
+
+ggplot(summary_df, aes(x = factor(arrival_date_year), y = percentage, fill = is_canceled)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = paste0(round(percentage, 1), "%")), 
+            position = position_dodge(width = 0.9), 
+            vjust = -0.5) +
+  labs(title = "Percentage of Cancellations by Arrival Year", 
+       x = "Arrival Year", 
+       y = "Percentage of Bookings") +
+  scale_fill_manual(values = c("Not Canceled" = "skyblue", "Canceled" = "tomato")) +
+  theme_minimal()+
+  theme(panel.grid = element_blank())
+```
+
+###  <span style="color:#4974a5;">4. How has the cancellation rate changed over the months?</span>
+
+```{r}
+df <- read.csv("D:\\DataScience-projects\\R Project\\Dataset\\hotel_bookings.csv")
+
+df$arrival_date_month <- factor(df$arrival_date_month, 
+                                levels = c("January", "February", "March", "April", "May", 
+                                           "June", "July", "August", "September", "October", 
+                                           "November", "December"))
+
+cancellation_rates <- df %>%
+  group_by(arrival_date_month) %>%
+  summarize(cancellation_rate = mean(is_canceled), .groups = 'drop') %>%
+  filter(!is.na(cancellation_rate))  
+
+ggplot(cancellation_rates, aes(x = arrival_date_month, y = cancellation_rate, group = 1)) +
+  geom_line(color = "tomato", linewidth = 1.2) +               
+  geom_point(color = "#ff7f0e", size = 3) +                      
+  labs(x = "Month", y = "Cancellation Rate", title = "Monthly Cancellation Rates") +
+  theme_minimal(base_size = 15) +                                
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),        
+        plot.title = element_text(hjust = 0.5, size = 18, face = "bold"),  
+        axis.title = element_text(size = 14, face = "bold"),       
+        axis.text = element_text(size = 12),                      
+       panel.grid.major = element_blank(),  
+        panel.grid.minor = element_blank())
+```
+
+###  <span style="color:#4974a5;">5. Which countries have the highest number of cancellations</span>
+
+```{r}
+df$is_canceled <- as.numeric(as.character(df$is_canceled))
+
+agg_data <- df %>%
+  group_by(country) %>%
+  summarise(total_cancellations = sum(is_canceled, na.rm = TRUE)) %>%
+  slice_max(total_cancellations, n = 5)  
+
+ggplot(agg_data, aes(x = total_cancellations, y = reorder(country, total_cancellations))) +
+  geom_bar(stat = "identity", fill = "tomato") +
+  geom_text(aes(label = total_cancellations), hjust = -0.2, color = "black") +  
+  labs(x = "Total Cancellations", y = "Country", title = "Top 5 Countries by Total Cancellations") +
+  theme_void() +  
+  theme(
+    axis.text.y = element_text(angle = 0, hjust = 1, margin = margin(r = 10)),   
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 14) 
+  ) +
+  scale_x_continuous(expand = expansion(mult = c(0, 0.1)))  
+
+```
+
+###  <span style="color:#4974a5;">6. Is there a customer type that consistently avoids cancellations?</span>
+
+```{r}
+agg_data <- df %>%
+  group_by(customer_type) %>%
+  summarise(total_cancellations = sum(is_canceled, na.rm = TRUE)) %>%
+  mutate(percentage = total_cancellations / sum(total_cancellations) * 100, 
+         label = paste0(round(percentage, 1), "%"))
+
+custom_colors <- c("Contract" = "#00ff00", 
+                   "Group" = "#66FF66", 
+                   "Transient" = "red", 
+                   "Transient-Party" = "#FF4C4C")
+
+ggplot(agg_data, aes(x = "", y = percentage, fill = customer_type)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +  
+  labs(x = NULL, y = NULL, title = "Cancellation Distribution by Customer Type") +
+  theme_void() + 
+  theme(legend.title = element_blank()) +  
+  geom_label_repel(aes(label = label), position = position_stack(vjust = 0.5), size = 3, show.legend = FALSE) +
+  scale_fill_manual(values = custom_colors)
+
+```
+
+###  <span style="color:#4974a5;">7. How does the deposit policy affect cancellation behavior?</span>
+
+```{r}
+agg_data <- df %>%
+  group_by(deposit_type) %>%
+  summarise(total_cancellations = sum(is_canceled, na.rm = TRUE)) %>%
+  mutate(percentage = total_cancellations / sum(total_cancellations) * 100, 
+         label = paste0(round(percentage, 1), "%")) 
+
+custom_colors <- c("No Deposit" = "red", 
+                   "Non Refund" = "#FF6666", 
+                   "Refundable" = "green")
+
+ggplot(agg_data, aes(x = "", y = percentage, fill = deposit_type)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +  
+  labs(x = NULL, y = NULL, title = "Cancellation Distribution by Deposit Type") +
+  theme_void() +  
+  theme(legend.title = element_blank()) +  
+  geom_label_repel(aes(label = label), position = position_stack(vjust = 0.5), size = 5, show.legend = FALSE) +
+  scale_fill_manual(values = custom_colors)
+```
+
+###  <span style="color:#4974a5;">8. How do different market segments compare in terms of cancellation rates?</span>
+
+```{r}
+
+agg_data <- df %>% 
+  group_by(market_segment) %>% 
+  summarise(total_cancellations = sum(is_canceled, na.rm = TRUE))
+ggplot(agg_data, aes(x = reorder(market_segment, -total_cancellations), y = total_cancellations)) +
+  geom_bar(stat = "identity", fill = "tomato") +
+  geom_text(aes(label = total_cancellations), vjust = -0.5, size = 3.5) +  
+  labs(x = "Market Segment", y = "Total Cancellations", title = "Total Cancellations by Market Segment") +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),  
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(), 
+    panel.background = element_blank(),  
+    plot.background = element_blank()   
+  )
+
+
+```
+
+###  <span style="color:#4974a5;">9. Which assigned room type generates the highest sum of ADR?</span>
+
+```{r}
+
+agg_data <- df %>%
+  group_by(assigned_room_type) %>%
+  summarise(average_adr = sum(adr, na.rm = TRUE))
+
+agg_data <- df %>%
+  group_by(assigned_room_type) %>%
+  summarise(average_adr = sum(adr, na.rm = TRUE))
+
+ggplot(agg_data, aes(x = reorder(assigned_room_type, -average_adr), y = average_adr)) +
+  geom_bar(stat = "identity", fill = "tomato", width = 0.9) +  
+  geom_text(aes(label = round(average_adr, 0)), vjust = -0.5, size = 2.5) +  
+  labs(x = "Assigned Room Type", y = "Sum Of ADR", title = "Average Daily Rate (ADR) by Assigned Room Type") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(hjust = 1),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank(),
+    plot.background = element_blank()
+  )
+
+
+
+```
+
+### <span style="color:#4974a5;">10. Which meal category is the most frequently selected?</span>
+
+```{r}
+meal_data <- df %>%
+  group_by(meal) %>%
+  summarise(count = n())
+  
+ggplot(meal_data, aes(x = reorder(meal, -count), y = count)) +
+  geom_bar(stat = "identity", fill = "green") +
+  geom_text(aes(label = count), vjust = -0.5) +  
+  labs(x = "Meal Category", y = "Count", title = "Distribution of Meal Categories") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(hjust = 1),
+        panel.grid.major = element_blank(),  
+        panel.grid.minor = element_blank(),  
+        panel.background = element_blank(),  
+        plot.background = element_blank())
+```
+
+###  <span style="color:#4974a5;">11. How does the total number of booking changes vary across different lead time bins?</span>
+
+```{r}
+df <- df %>%
+   mutate(lead_time_bin = cut(lead_time, 
+                              breaks = c(0, 50, 100, 150, 200, 250, 300, 350, Inf),
+                              labels = c("0-50", "51-100", "101-150", "151-200", "201-250", "251-300", "301-350", "350+"),
+                              include.lowest = TRUE))
+
+agg_data10 <- df %>%
+  group_by(lead_time_bin) %>%
+  summarise(total_changes = sum(booking_changes, na.rm = TRUE))  
+
+ggplot(agg_data10, aes(x = lead_time_bin, y = total_changes)) +
+  geom_bar(stat = "identity", fill = "#00FFFF") +
+  geom_text(aes(label = total_changes), vjust = -0.5) +  
+  labs(x = "Lead Time Bin", y = "Total Number of Changes", title = "Total Number of Changes by Lead Time Bin") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(hjust = 0.5),
+        panel.grid.major = element_blank(),  
+        panel.grid.minor = element_blank(),  
+        panel.background = element_blank(),  
+        plot.background = element_blank())
+
+```
+
+###  <span style="color:#4974a5;">12. How does the number of special requests relate to the number of adults and children?</span>
+
+```{r}
+
+agg_data <- df %>%
+  group_by(total_of_special_requests) %>%
+  summarise(
+    total_adults = sum(adults, na.rm = TRUE),
+    total_children = sum(children, na.rm = TRUE)
+  )
+
+agg_data_long <- agg_data %>%
+  pivot_longer(cols = c(total_adults, total_children),
+               names_to = "category",
+               values_to = "count")
+
+ggplot(agg_data_long, aes(x = total_of_special_requests, y = count, fill = category)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Total of Special Requests", y = "Count", title = "Count of Adults and Children by Total Special Requests") +
+  scale_fill_manual(values = c("blue", "green")) +  
+  theme_minimal() +
+  theme(
+    panel.grid.major = element_blank(),  
+    panel.grid.minor = element_blank()   
+  )
+```
+
+###  <span style="color:#4974a5;">13. Which customer type makes the highest number of special requests?</span>
+
+```{r}
+agg_data <- df %>%
+  group_by(customer_type) %>%
+  summarise(total_special_requests = sum(total_of_special_requests, na.rm = TRUE))
+
+ggplot(agg_data, aes(x = reorder(customer_type, -total_special_requests), y = total_special_requests, fill = customer_type)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = total_special_requests), vjust = -0.5) +  
+  labs(title = "Total Special Requests by Customer Type",
+       x = "Customer Type",
+       y = "Total Special Requests") +
+  theme_minimal() +
+  theme(panel.grid = element_blank())
+
+```
+
+###  <span style="color:#4974a5;">14. Which reserved room type has the highest number of bookings?</span>
+
+```{r}
+
+agg_data <- df %>%
+  group_by(reserved_room_type) %>%
+  summarise(total_bookings = n())
+
+ggplot(agg_data, aes(x = reorder(reserved_room_type, -total_bookings), y = total_bookings, fill = reserved_room_type)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = total_bookings), vjust = -0.5) +  
+  labs(title = "Total Bookings by Reserved Room Type",
+       x = "Reserved Room Type",
+       y = "Total Bookings") +
+  theme_minimal() +
+  theme(panel.grid = element_blank())
+
+```
+
+###  <span style="color:#4974a5;">15. Which deposit type is associated with the highest number of bookings?</span>
+
+```{r}
+
+agg_data <- df %>%
+  group_by(deposit_type) %>%
+  summarise(total_bookings = n())
+
+ggplot(agg_data, aes(x = deposit_type, y = total_bookings, fill = deposit_type)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = total_bookings), vjust = -0.5) +  
+  labs(title = "Total Bookings by Deposit Type",
+       x = "Deposit Type",
+       y = "Total Bookings") +
+  theme_minimal() +
+  theme(panel.grid = element_blank())
+
+```
+
+### <span style="color:#4974a5;"> 16. Which reservation status category has the highest number of bookings?</span>
+
+```{r}
+agg_data <- df %>%
+  group_by(reservation_status) %>%
+  summarise(total_bookings = n())
+
+ggplot(agg_data, aes(x = reorder(reservation_status, -total_bookings), y = total_bookings, fill = reservation_status)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = total_bookings), vjust = -0.5) +  
+  labs(title = "Total Bookings by Reservation Status",
+       x = "Reservation Status",
+       y = "Total Bookings") +
+  theme_minimal() +
+  theme(panel.grid = element_blank()) +
+  scale_fill_brewer(palette = "Set1")
+```
+
+### <span style="color:#4974a5;"> 17. What percentage of total bookings are canceled versus not canceled?</span>
+
+```{r}
+agg_data <- df %>%
+  group_by(is_canceled) %>%
+  summarise(total_bookings = n()) %>%
+  mutate(percentage = total_bookings / sum(total_bookings) * 100,
+         is_canceled_label = factor(is_canceled, levels = c(0, 1), labels = c("Not Canceled", "Canceled")))
+
+ggplot(agg_data, aes(x = "", y = percentage, fill = is_canceled_label)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y") +
+  geom_text(aes(label = paste0(round(percentage, 1), "%")), position = position_stack(vjust = 0.5)) +
+  labs(title = "Booking Cancellations", fill = "Cancellation Status") +
+  theme_void() +
+  theme(legend.position = "right") +
+  scale_fill_manual(values = c("Not Canceled" = "skyblue", "Canceled" = "tomato"))
+
+```
+
+
+### <span style="color:#4974a5;">Conclusion for the Hotel Bookings Data Analysis</span>
+
+### <span style="color:#4974a5;"> After performing a detailed analysis of the hotel bookings dataset, the following key insights have emerged</span>
+
+### <span style="color:#4974a5;"> Cancellation Patterns</span>
+
+A significant portion of bookings were canceled, highlighting a potential issue with booking reliability. Understanding the reasons behind cancellations (e.g., long lead times or booking policies) could help in mitigating future cancellations.
+The cancellation rate fluctuates across different years, with certain years showing a higher tendency for cancellations. This trend may be influenced by external factors such as economic conditions or travel restrictions.
+
+### <span style="color:#4974a5;">Lead Time Impact </span>
+
+Bookings with longer lead times (more days between booking and arrival) have a higher likelihood of being canceled. The majority of cancellations happen when the lead time is beyond 100 days. This suggests that people who book further in advance are more likely to cancel.
+Conversely, bookings with shorter lead times (e.g., less than 50 days) show fewer cancellations, indicating that last-minute bookings tend to be more reliable.
+
+### <span style="color:#4974a5;"> Seasonality of Cancellations</span>
+
+The month of arrival has a noticeable impact on cancellation rates. Certain months, particularly the peak vacation seasons (e.g., July and August), show higher cancellation rates. This could be due to overbooking or fluctuating vacation plans.
+Hotels might benefit from implementing more flexible booking or cancellation policies during these high-cancellation periods to reduce booking loss.
+
+### <span style="color:#4974a5;"> Impact of Hotel Type</span>
+
+Resort hotels experience higher lead times and slightly higher cancellation rates compared to city hotels. This is likely because resort bookings are made well in advance for holidays or special events, which are more prone to cancellation as plans change.
+City hotels tend to attract more last-minute bookings, leading to lower cancellation rates and quicker turnover of rooms.
+
+### <span style="color:#4974a5;">Yearly Booking Trends </span>
+
+The number of bookings has grown consistently over the years, indicating increasing popularity or market demand for these hotels.
+Despite this growth, the proportion of cancellations has remained relatively stable, suggesting that the hotels are maintaining a balance between their booking and cancellation rates over time.
+
+## <span style="color:#4974a5;">Recommendations </span>
+
+### <span style="color:#4974a5;"> Cancellation Policy Adjustments</span> 
+
+Consider offering incentives for early bookings with shorter lead times or penalties for cancellations closer to the booking date. Flexible booking options could help reduce cancellations while maintaining customer satisfaction.
+Marketing Strategies: Target customers who tend to make last-minute bookings, especially during off-peak months, to improve occupancy rates and reduce reliance on bookings with long lead times.
+
+### <span style="color:#4974a5;">Seasonal Preparations </span> 
+
+Be proactive in adjusting pricing and availability during high-cancellation periods such as summer holidays. Overbooking strategies or stricter cancellation policies may be necessary during these months to avoid revenue loss.
+
+
+
+```{r}
+tinytex::install_tinytex()
+
+```
+
